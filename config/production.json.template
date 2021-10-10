@@ -6,14 +6,14 @@
     "steamAPIKey": "API Key For Steam Calls.",
     "sharedSecret": "a secure secret for session sigining.",
     "clientHome": "http://localhost:8080",
-    "useRedis": true,
+    "useRedis": false,
     "apiURL": "http://localhost:8080/api/",
     "uploadDemos": false
   },
   "production": {
     "driver": "mysql",
-    "user": "get5_user",
-    "password": "",
+    "user": "g5api",
+    "password": "changeme",
     "database": "get5",
     "multipleStatements": true,
     "flags": { "ENV": "MYSQL_FLAGS" },
