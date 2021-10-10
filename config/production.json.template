@@ -23,7 +23,7 @@
     "redisHost": "localhost",
     "redisPort": 6379,
     "redisTTL": 86400,
-    "redisPass": "super_secure"
+    "redisPass": ""
   },
   "admins": {
     "steam_ids": "admins,go,here"
