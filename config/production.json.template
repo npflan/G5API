@@ -12,7 +12,7 @@
   },
   "production": {
     "driver": "mysql",
-    "user": "g5api",
+    "user": "get5_user",
     "password": "changeme",
     "database": "get5",
     "multipleStatements": true,
