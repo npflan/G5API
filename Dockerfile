@@ -28,9 +28,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # clone and move into Get5API folder
 RUN mkdir /Get5API
 RUN mkdir /etc/redis
-WORKDIR /Get5API
-RUN git clone https://github.com/PhlexPlexico/G5API.git
+
 WORKDIR /Get5API/G5API
+COPY . .
 
 # copy production and redis into place
 RUN cp /Get5API/G5API/config/production.json.template /Get5API/G5API/config/production.json
