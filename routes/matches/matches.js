@@ -716,6 +716,14 @@ router.post("/", Utils.ensureAuthenticated, async (req, res, next) => {
         let newAuth = await Utils.getSteamPID(req.body[0].spectator_auths[key]);
         await newSingle.query(sql, [insertMatch[0].insertId, newAuth]);
       }
+      if(process.env.DEFAULT_SPECTATORS){
+        const splitSpectators = process.env.DEFAULT_SPECTATORS.split(",");
+        for (let key in splitSpectators) {
+          let newAuth = await Utils.getSteamPID(splitSpectators[key]);
+          await newSingle.query(sql, [insertMatch[0].insertId, newAuth]);
+        }
+      }
+
       if (req.body[0].match_cvars != null) {
         let cvarInsertSet = req.body[0].match_cvars;
         for (let key in cvarInsertSet) {
