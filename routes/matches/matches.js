@@ -617,6 +617,18 @@ router.get("/:match_id/config", async (req, res, next) => {
  *         $ref: '#/components/responses/Error'
  */
 router.post("/", Utils.ensureAuthenticated, async (req, res, next) => {
+
+  function checkDefaultEnforceTeam() {
+    if(process.env.ENFORCE_TEAMS === "true")
+    {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  const defaultEnforceTeamValue = checkDefaultEnforceTeam();
+
   try {
     let newSingle = await db.getConnection();
     // Check if server available, if we are given a server.
@@ -679,7 +691,7 @@ router.post("/", Utils.ensureAuthenticated, async (req, res, next) => {
         private_match:
           req.body[0].private_match == null ? 0 : req.body[0].private_match,
         enforce_teams:
-          req.body[0].enforce_teams == null ? 1 : req.body[0].enforce_teams,
+          req.body[0].enforce_teams == null ? defaultEnforceTeamValue : req.body[0].enforce_teams,
         api_key: apiKey,
         winner: null,
         team1_string:
