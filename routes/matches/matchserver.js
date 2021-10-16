@@ -13,6 +13,8 @@ const Utils = require("../../utility/utils");
 
 const GameServer = require("../../utility/serverrcon");
 
+const config = require("config");
+
 /**
  * @swagger
  *
@@ -148,6 +150,88 @@ router.get(
           }
           res.json({ message: "Match has been forfeitted successfully." });
           return;
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Error on game server.", response: err });
+    }
+  }
+);
+
+router.get(
+  "/:match_id/resendConfig/",
+  Utils.ensureAuthenticated,
+  async (req, res, next) => {
+    const match_id = req.params.match_id;
+
+    try {
+      let errMessage = await Utils.getUserMatchAccess(
+        match_id,
+        req.user,
+        true,
+        true
+      );
+      if (errMessage != null) {
+        res.status(errMessage.status).json({ message: errMessage.message });
+        return;
+      } else {
+        let currentMatchInfo = "SELECT server_id, api_key FROM `match` WHERE id = ?";
+        let getServerSQL =
+          "SELECT ip_string, port, rcon_password, user_id FROM game_server WHERE id=?";
+        let newSingle = await db.getConnection();
+        await db.withNewTransaction(newSingle, async () => {
+          const matchServerId = await newSingle.query(
+            currentMatchInfo,
+            match_id
+          );
+          const serverRow = await newSingle.query(getServerSQL, [
+            matchServerId[0][0].server_id,
+          ]);
+          if (
+            !Utils.superAdminCheck(req.user) &&
+            serverRow[0][0].user_id != req.user.id
+          ) {
+            res
+              .status(403)
+              .json({ message: "User is not authorized to perform action." });
+            return;
+          }
+          let serverUpdate = new GameServer(
+            serverRow[0][0].ip_string,
+            serverRow[0][0].port,
+            serverRow[0][0].rcon_password
+          );
+          try {
+            if (
+              (await serverUpdate.isServerAlive()) &&
+              (await serverUpdate.isGet5Available())
+            ) {
+              if (
+                !(await serverUpdate.prepareGet5Match(
+                  config.get("server.apiURL") +
+                    "/matches/" +
+                    match_id +
+                    "/config",
+                    matchServerId[0][0].api_key
+                ))
+              ) {
+                throw "Please check server logs, as something was not set properly. You may cancel the match and server status is not updated.";
+              }
+            }
+
+            return;
+          } catch (err) {
+            console.error(err);
+            console.error(
+              "Error attempting to send RCON Command. Please check server log."
+            );
+            res.status(500).json({
+              message:
+                "Error attempting to send RCON Command. Please check server log.",
+            });
+            return;
+          }
         });
       }
     } catch (err) {
